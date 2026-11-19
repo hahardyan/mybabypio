@@ -11,7 +11,6 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Google Fonts -->
-  <!--<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Pacifico&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">-->
   <link href="https://fonts.googleapis.com/css2?family=Satisfy&family=Pacifico&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <script>
@@ -317,6 +316,13 @@
     </div>
   </div>
 
+  <!-- EDIT DI SINI — ganti musik/birthday-song.mp3 dengan file MP3 milik Anda.
+       Musik akan dicoba otomatis saat tombol Buka Kejutan ditekan.
+       Browser tertentu dapat memblokirnya; tombol ON/OFF tetap tersedia. -->
+  <audio id="backgroundMusic" preload="none" loop>
+    <source src="music/birthday-song.mp3" type="audio/mpeg">
+  </audio>
+
   <!-- Music Toggle Button -->
   <button id="musicToggleBtn" onclick="toggleAudio()" class="fixed top-5 right-5 z-40 glass-card px-4 py-2.5 rounded-full flex items-center gap-2 text-xs font-semibold text-romanticPink shadow-lg hover:border-romanticPink transition-all">
     <i id="musicIcon" class="fa-solid fa-music"></i>
@@ -612,6 +618,8 @@
       if (enteredPasscode === CORRECT_PASSCODE) {
         document.getElementById('passcodeScreen').style.display = 'none';
         document.getElementById('mainContent').classList.remove('hidden');
+        // Musik mulai saat pengunjung sendiri menekan Buka Kejutan.
+        startBackgroundMusic();
         triggerConfetti();
         startFloatingHearts();
         initScratchCard();
@@ -650,53 +658,73 @@
       }, 600);
     }
 
-    // 4. Web Audio Synthesizer
-    let audioCtx = null;
+    // 4. BACKGROUND MUSIC MP3 — EDIT DI SINI
+    // Letakkan file music/birthday-song.mp3 di GitHub.
+    // Volume maksimal setelah fade-in: 0.35 = 35%.
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    const MUSIC_TARGET_VOLUME = 0.35;
+    const MUSIC_FADE_IN_MS = 2000;
     let isPlaying = false;
-    let audioLoop = null;
+    let musicFadeTimer = null;
+    backgroundMusic.volume = MUSIC_TARGET_VOLUME;
 
-    function playMelody() {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+    function syncMusicButton() {
+      document.getElementById('musicText').textContent = isPlaying ? 'Musik: ON' : 'Musik: OFF';
+      document.getElementById('musicIcon').classList.toggle('animate-spin', isPlaying);
+    }
 
-      const notes = [261.63, 329.63, 392.00, 523.25, 440.00, 349.23];
-      let noteIdx = 0;
+    function stopMusicFade() {
+      if (musicFadeTimer !== null) {
+        clearInterval(musicFadeTimer);
+        musicFadeTimer = null;
+      }
+    }
 
-      audioLoop = setInterval(() => {
-        if (!isPlaying) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(notes[noteIdx], audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 1.2);
-
-        noteIdx = (noteIdx + 1) % notes.length;
-      }, 600);
+    async function startBackgroundMusic() {
+      if (isPlaying) return;
+      stopMusicFade();
+      backgroundMusic.volume = 0;
+      try {
+        await backgroundMusic.play();
+        isPlaying = true;
+        syncMusicButton();
+        const started = performance.now();
+        musicFadeTimer = setInterval(() => {
+          const progress = Math.min(1, (performance.now() - started) / MUSIC_FADE_IN_MS);
+          backgroundMusic.volume = MUSIC_TARGET_VOLUME * progress;
+          if (progress >= 1) stopMusicFade();
+        }, 50);
+      } catch (err) {
+        stopMusicFade();
+        backgroundMusic.volume = MUSIC_TARGET_VOLUME;
+        isPlaying = false;
+        syncMusicButton();
+        // Kemungkinan MP3 belum diunggah atau browser memblokir autoplay.
+        console.info('Musik belum bisa dimainkan. Periksa music/birthday-song.mp3 dan izin browser.', err);
+      }
     }
 
     function toggleAudio() {
-      const musicBtnText = document.getElementById('musicText');
-      const musicIcon = document.getElementById('musicIcon');
-
-      if (!isPlaying) {
-        isPlaying = true;
-        playMelody();
-        musicBtnText.innerText = 'Musik: ON';
-        musicIcon.classList.add('animate-spin');
-      } else {
+      if (isPlaying) {
+        stopMusicFade();
+        backgroundMusic.pause();
         isPlaying = false;
-        if (audioLoop) clearInterval(audioLoop);
-        musicBtnText.innerText = 'Musik: OFF';
-        musicIcon.classList.remove('animate-spin');
+        syncMusicButton();
+      } else {
+        startBackgroundMusic();
       }
     }
+
+    backgroundMusic.addEventListener('pause', () => {
+      stopMusicFade();
+      isPlaying = false;
+      syncMusicButton();
+    });
+    backgroundMusic.addEventListener('error', () => {
+      stopMusicFade();
+      isPlaying = false;
+      syncMusicButton();
+    });
 
     // 5. Mini Game Logic
     let canvas, ctx;
