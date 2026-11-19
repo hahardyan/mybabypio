@@ -115,6 +115,16 @@
       .birthday-backdrop .doodle { animation: none !important; }
     }
 
+    /* REVISI: tombol confetti icon-only. Tetap mudah ditekan di layar HP. */
+    .confetti-emoji-btn { display: inline-grid; place-items: center; width: 64px; height: 64px;
+      font-size: 35px; line-height: 1; border-radius: 50%; background: rgba(255,255,255,.9);
+      border: 2px solid rgba(255,255,255,.9); box-shadow: 0 10px 25px rgba(178,65,128,.2);
+      transition: transform .2s, box-shadow .2s; cursor: pointer; }
+    .confetti-emoji-btn:hover { transform: translateY(-3px) rotate(-12deg) scale(1.08); box-shadow: 0 14px 28px rgba(178,65,128,.3); }
+    .confetti-emoji-btn:active { transform: scale(.94); }
+    .confetti-emoji-btn:focus-visible { outline: 3px solid #7e40a4; outline-offset: 4px; }
+    @media (prefers-reduced-motion: reduce) { .confetti-emoji-btn { transition: none; } }
+
     /* Glassmorphism Card Effect */
     .glass-card {
       background: rgba(255, 255, 255, 0.90);
@@ -287,7 +297,7 @@
       </div>
       
       <h2 class="text-3xl font-romantic font-bold text-romanticPink mb-2">Pintu Rahasia Ulang Tahun</h2>
-      <p class="text-gray-600 text-xs md:text-sm mb-6">Masukkan kode rahasia ulang tahunmu untuk membuka kejutan manis ini! <br><span class="text-xs text-romanticPink font-semibold">(Kode sandi: <span class="font-mono underline">1234</span>)</span></p>
+      <p class="text-gray-600 text-xs md:text-sm mb-6">Masukkan kode rahasia ulang tahunmu untuk membuka kejutan manis ini! <br><span class="text-xs text-romanticPink font-semibold">(Petunjuk: empat angka yang punya arti spesial 💖)</span></p>
 
       <div class="flex justify-center gap-3 mb-6">
         <input type="password" maxlength="1" class="pass-digit w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 border-romanticPink/40 bg-white/70 focus:outline-none focus:border-romanticPink focus:ring-2 focus:ring-romanticPink/30">
@@ -297,7 +307,7 @@
       </div>
 
       <p id="passErrorMessage" class="text-red-500 text-xs hidden mb-4 font-medium">
-        <i class="fa-solid fa-circle-exclamation"></i> Kode salah sayang, coba ketik 1234 ya! 💖
+        <i class="fa-solid fa-circle-exclamation"></i> Kode belum tepat, coba lagi ya! 💖
       </p>
 
       <button onclick="checkPasscode()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-romanticPink to-pink-600 text-white font-bold shadow-lg hover:opacity-90 active:scale-95 transition-all">
@@ -330,13 +340,9 @@
         Terima kasih telah hadir dan mewarnai hidupku. Hari ini sepenuhnya milikmu untuk tersenyum dan bahagia!
       </p>
 
-      <div class="flex flex-wrap justify-center gap-4">
-        <button onclick="triggerConfetti()" class="px-7 py-3 rounded-full bg-white text-romanticPink font-bold shadow-lg hover:bg-romanticSoft hover:scale-105 active:scale-95 transition-all">
-          <i class="fa-solid fa-gift mr-2"></i> Rayakan Dengan Confetti!
-        </button>
-        <a href="#photoboothSection" class="px-7 py-3 rounded-full glass-card text-gray-800 font-semibold hover:text-romanticPink transition-all">
-          3-Strip Photobooth <i class="fa-solid fa-camera ml-2"></i>
-        </a>
+      <!-- REVISI: tombol confetti hanya berupa emoji; tautan pintas photobooth dihapus agar bisa scroll bebas. -->
+      <div class="flex justify-center mt-2">
+        <button type="button" onclick="triggerConfetti()" aria-label="Rayakan dengan confetti" title="Klik untuk confetti!" class="confetti-emoji-btn" >🎉</button>
       </div>
     </header>
 
@@ -497,14 +503,24 @@
     <section class="my-16 text-center">
       <div class="glass-card p-8 md:p-10 rounded-3xl border border-white/50 relative shadow-xl">
         <h2 class="text-4xl font-romantic font-bold text-romanticPink mb-2">Tiup Lilin Ulang Tahunmu 🎂</h2>
-        <p id="cakeInstruction" class="text-gray-600 text-sm mb-10">Klik pada api lilin untuk meniupnya dan buat permohonan!</p>
+        <p id="cakeInstruction" class="text-gray-600 text-sm mb-4" aria-live="polite">Tap lilin 6 kali untuk meniupnya! 💨</p>
+        <!-- EDIT OPSIONAL — jumlah tap diatur dalam const CANDLE_TAPS_REQUIRED pada JavaScript. -->
+        <div class="max-w-xs mx-auto mb-9" aria-label="Progres tiup lilin">
+          <div class="flex items-center justify-between text-xs text-pink-700 font-semibold mb-2">
+            <span id="candleProgressLabel">Kekuatan tiupan</span>
+            <span id="candleProgressCount">0 / 6</span>
+          </div>
+          <div id="candleProgressTrack" class="h-4 bg-pink-100 border border-pink-200 rounded-full overflow-hidden shadow-inner" role="progressbar" aria-label="Progres tiup lilin" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
+            <div id="candleProgressFill" class="h-full rounded-full transition-all duration-300" style="width:0%; background:linear-gradient(90deg,#ffb4d2,#fb7eac,#d99af1)"></div>
+          </div>
+        </div>
 
         <!-- CSS Birthday Cake -->
         <div class="relative w-48 h-48 mx-auto flex flex-col items-center justify-end mb-6">
-          <div onclick="blowCandle()" class="cursor-pointer group flex flex-col items-center mb-[-4px] z-20">
+          <button id="candleTapButton" type="button" onclick="blowCandle()" aria-label="Tap untuk meniup lilin" class="cursor-pointer group flex flex-col items-center mb-[-4px] z-20 rounded-xl focus-visible:outline focus-visible:outline-4 focus-visible:outline-pink-500" title="Tap lilinnya beberapa kali">
             <div id="candleFlame" class="flame group-hover:scale-125 transition-transform"></div>
             <div class="w-4 h-12 bg-gradient-to-b from-romanticLight via-white to-pink-300 rounded-t-sm shadow-md"></div>
-          </div>
+          </button>
 
           <div class="w-36 h-12 bg-gradient-to-r from-pink-400 via-rose-300 to-pink-400 rounded-t-3xl border-b-4 border-pink-500/30 flex items-center justify-center relative shadow-lg">
             <div class="absolute -top-2 left-3 w-4 h-4 bg-white rounded-full"></div>
@@ -571,7 +587,7 @@
   <script>
     // EDIT DI SINI — kode ulang tahun (4 angka). Ini hanya pengunci kejutan,
     // bukan proteksi aman: kode dalam HTML publik dapat dilihat pengunjung.
-    const CORRECT_PASSCODE = "1234";
+    const CORRECT_PASSCODE = "2011";
 
     // 1. Passcode Screen Logic
     const passInputs = document.querySelectorAll('.pass-digit');
@@ -974,13 +990,30 @@
       updateSlotHighlight();
     }
 
-    // 7. Candle Blow Logic
+    // 7. Candle Blow Logic — EDIT OPSIONAL: ubah jumlah tap yang dibutuhkan.
+    const CANDLE_TAPS_REQUIRED = 6;
+    let candleTapCount = 0;
     let candleBlown = false;
     function blowCandle() {
       if (candleBlown) return;
-      document.getElementById('candleFlame').classList.add('extinguished');
+      candleTapCount = Math.min(candleTapCount + 1, CANDLE_TAPS_REQUIRED);
+      const percent = (candleTapCount / CANDLE_TAPS_REQUIRED) * 100;
+      const progress = document.getElementById('candleProgressTrack');
+      document.getElementById('candleProgressFill').style.width = percent + '%';
+      document.getElementById('candleProgressCount').textContent = `${candleTapCount} / ${CANDLE_TAPS_REQUIRED}`;
+      progress.setAttribute('aria-valuemax', CANDLE_TAPS_REQUIRED);
+      progress.setAttribute('aria-valuenow', candleTapCount);
+
+      if (candleTapCount < CANDLE_TAPS_REQUIRED) {
+        document.getElementById('cakeInstruction').innerText = `Tiup terus, sayang! 💨 ${CANDLE_TAPS_REQUIRED - candleTapCount} tap lagi...`;
+        return;
+      }
       candleBlown = true;
-      document.getElementById('cakeInstruction').innerText = "Lilin telah ditiup! ✨";
+      document.getElementById('candleFlame').classList.add('extinguished');
+      document.getElementById('candleTapButton').disabled = true;
+      document.getElementById('candleTapButton').setAttribute('aria-label', 'Lilin sudah ditiup');
+      document.getElementById('cakeInstruction').innerText = 'Lilin sudah ditiup! ✨';
+      document.getElementById('candleProgressLabel').innerText = 'Tiupan berhasil!';
       document.getElementById('wishMessage').classList.remove('hidden');
       triggerConfetti();
     }
