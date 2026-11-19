@@ -35,13 +35,84 @@
     }
   </script>
 
+  <!-- PANDUAN PERSONALISASI:
+       Cari teks "EDIT DI SINI" di file ini (Ctrl+F).
+       Foto kenangan: images/memory1.jpg, memory2.jpg, memory3.jpg.
+       Frame photobooth: pastel-frame.png (jangan hapus).
+       Upload semua file beserta folder images/ ke root GitHub Pages.
+  -->
   <style>
     body {
-      background: linear-gradient(135deg, #ffccd5 0%, #ffb3c1 50%, #f72585 100%);
+      /* EDIT OPSIONAL — warna / efek background utama. */
+    /* Dreamy Birthday: layered pastel background that remains pretty while scrolling */
+      background: radial-gradient(ellipse at 18% 10%, rgba(255,244,200,.85) 0%, transparent 33%),
+                  radial-gradient(ellipse at 80% 20%, rgba(206,185,255,.74) 0%, transparent 35%),
+                  radial-gradient(ellipse at 28% 60%, rgba(255,213,234,.85) 0%, transparent 43%),
+                  radial-gradient(ellipse at 87% 83%, rgba(255,236,203,.8) 0%, transparent 34%),
+                  linear-gradient(155deg, #e987b3 0%, #efa8cb 22%, #e9c1eb 52%, #f9c3d6 77%, #f4a9c5 100%);
+      background-attachment: fixed;
       color: #2b2d42;
       min-height: 100vh;
       overflow-x: hidden;
       font-family: 'Poppins', sans-serif;
+    }
+
+    /* Animated atmospheric ornaments: independent of all game and photobooth canvases */
+    .birthday-backdrop { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .birthday-backdrop .glow {
+      position: absolute; display: block; border-radius: 50%;
+      filter: blur(12px); opacity: .55; will-change: transform;
+      animation: ambientFloat 19s ease-in-out infinite alternate;
+    }
+    .birthday-backdrop .glow-1 {
+      width: min(48vw, 520px); aspect-ratio: 1; left: -17%; top: 8%;
+      background: radial-gradient(circle, rgba(255,255,232,.72), rgba(255,228,193,.24) 60%, transparent 75%);
+    }
+    .birthday-backdrop .glow-2 {
+      width: min(58vw, 640px); aspect-ratio: 1; right: -24%; top: 38%;
+      background: radial-gradient(circle, rgba(218,195,255,.68), rgba(247,224,255,.16) 65%, transparent 76%);
+      animation-delay: -8s; animation-duration: 23s;
+    }
+    .birthday-backdrop .glow-3 {
+      width: min(56vw, 580px); aspect-ratio: 1; left: -20%; bottom: -9%;
+      background: radial-gradient(circle, rgba(255,245,210,.75), rgba(255,215,235,.18) 65%, transparent 76%);
+      animation-delay: -13s; animation-duration: 27s;
+    }
+    @keyframes ambientFloat {
+      0% { transform: translate3d(-12px, -14px, 0) scale(.94); }
+      100% { transform: translate3d(27px, 30px, 0) scale(1.13); }
+    }
+    .birthday-backdrop .twinkle {
+      position: absolute; color: rgba(255,255,255,.92); line-height: 1;
+      text-shadow: 0 0 14px rgba(255,255,255,.86);
+      animation: birthdayTwinkle 4.5s ease-in-out infinite;
+    }
+    @keyframes birthdayTwinkle {
+      0%, 100% { opacity: .30; transform: scale(.74) rotate(-8deg); }
+      50% { opacity: .95; transform: scale(1.15) rotate(12deg); }
+    }
+    .birthday-backdrop .doodle {
+      position: absolute; opacity: .23; font-size: clamp(25px, 3.5vw, 48px);
+      animation: doodleSway 9s ease-in-out infinite alternate;
+      filter: drop-shadow(0 3px 5px rgba(216,100,153,.13));
+    }
+    @keyframes doodleSway {
+      from { transform: translateY(-7px) rotate(-10deg); }
+      to { transform: translateY(12px) rotate(12deg); }
+    }
+    /* Readable content; existing glass-card effects remain unchanged. */
+    #mainContent > header h1 { text-shadow: 0 3px 16px rgba(119,39,89,.26), 0 1px 3px rgba(100,30,77,.20); }
+    #mainContent > header > p, #mainContent section > .text-center > p.text-white\/90 {
+      text-shadow: 0 2px 8px rgba(115,46,93,.24);
+    }
+    @media (max-width: 640px) {
+      body { background-attachment: scroll; }
+      .birthday-backdrop .glow { filter: blur(16px); }
+      .birthday-backdrop .doodle { opacity: .17; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .birthday-backdrop .glow, .birthday-backdrop .twinkle,
+      .birthday-backdrop .doodle { animation: none !important; }
     }
 
     /* Glassmorphism Card Effect */
@@ -87,6 +158,10 @@
     .flame.extinguished {
       display: none;
     }
+
+    /* Jika foto personal belum diunggah, tampilkan petunjuk pada area foto. */
+    .memory-image-missing {position:relative; min-height:120px;}
+    .memory-image-missing::before {content:'📷 Upload foto ke folder images/';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#b86d94;font-size:12px;padding:16px;}
 
     /* Polaroid Hover Effect */
     .polaroid {
@@ -179,34 +254,25 @@
       border: 2px dashed rgba(225,80,140,.7); z-index: 2;
       pointer-events: none;
     }
-
-    /* Birthday Experience 2.0: gift opening, story timeline and love notes */
-    .gift-overlay { position:fixed; inset:0; z-index:55; display:flex; align-items:center; justify-content:center; padding:20px; background:linear-gradient(145deg,#fce2ef,#e9d9fa 55%,#fff7e9); overflow-y:auto; }
-    .gift-overlay[hidden] { display:none !important; }
-    .gift-panel { width:min(100%,480px); padding:30px 22px; text-align:center; border-radius:30px; background:#fffefaed; box-shadow:0 25px 70px #ba63904a; border:2px solid #fff; }
-    .gift-visual { width:190px; height:190px; margin:15px auto 22px; position:relative; display:block; cursor:pointer; border:0; background:transparent; }
-    .gift-box-shape { position:absolute; left:29px; top:77px; width:132px; height:97px; border-radius:8px 8px 17px 17px; background:linear-gradient(120deg,#ff84b8,#f45194); box-shadow:0 12px 18px #db80a155; transition:transform .65s; }
-    .gift-box-shape::after {content:'';position:absolute;left:53px;top:0;height:100%;width:26px;background:#ffdb84;}
-    .gift-lid {position:absolute;top:60px;left:19px;width:152px;height:32px;border-radius:8px;background:#ff91bf;box-shadow:0 5px 0 #e96b9d;z-index:2;transition:transform .7s;}
-    .gift-lid::after {content:'🎀';position:absolute;font-size:57px;top:-48px;left:45px;}
-    .gift-visual.open .gift-lid {transform:translate(-35px,-70px) rotate(-22deg);}
-    .gift-visual.open .gift-box-shape {transform:translateY(18px) scale(.92);}
-    .gift-visual:focus-visible {outline:3px solid #a967ba; outline-offset:2px; border-radius:20px;}
-    .gift-message {animation:giftRise .6s ease-out both;}
-    @keyframes giftRise {from {opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-    .story-card {background:linear-gradient(140deg,#fff,#fff5fa);border:1px solid #f6c8df;border-radius:20px;padding:18px 20px;box-shadow:0 8px 22px #e47aa01c;}
-    .story-line {position:relative;padding-left:30px;border-left:3px dashed #ef9cc3;margin-left:12px;}
-    .story-entry {position:relative;margin-bottom:20px;}
-    .story-entry:last-child {margin-bottom:0;}
-    .story-entry::before {content:'♥';position:absolute;left:-45px;top:15px;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#f49ac4;color:#fff;border:3px solid white;box-shadow:0 0 0 2px #f49ac4;font-size:11px;}
-    .note-jar {font-size:85px;line-height:1;filter:drop-shadow(0 12px 14px #e78fb07a);transition:transform .35s;display:inline-block;}
-    .note-jar.shake {animation:jarShake .45s ease;}
-    @keyframes jarShake {0%,100%{transform:rotate(0)}25%{transform:rotate(-11deg)}75%{transform:rotate(11deg)}}
-    .note-paper {background:#fff9e8;min-height:125px;border:1px solid #f2dfb7;box-shadow:0 9px 18px #d291a124;border-radius:15px;padding:24px 18px;display:flex;align-items:center;justify-content:center;transform:rotate(-1deg);}
-    @media (prefers-reduced-motion:reduce) {.gift-visual *,.gift-message,.note-jar {animation:none !important;transition:none !important;}}
   </style>
 </head>
 <body class="relative min-h-screen">
+
+  <!-- Dreamy Pastel Birthday Background — decorative, ignores all pointer events -->
+  <div class="birthday-backdrop" aria-hidden="true">
+    <span class="glow glow-1"></span><span class="glow glow-2"></span><span class="glow glow-3"></span>
+    <span class="twinkle" style="top:8%;left:9%;font-size:24px;animation-delay:-1s">✦</span>
+    <span class="twinkle" style="top:18%;right:8%;font-size:30px;animation-delay:-3s">✧</span>
+    <span class="twinkle" style="top:34%;left:5%;font-size:20px;animation-delay:-2s">✧</span>
+    <span class="twinkle" style="top:47%;right:7%;font-size:27px;animation-delay:-4s">✦</span>
+    <span class="twinkle" style="top:64%;left:9%;font-size:19px;animation-delay:-.5s">✦</span>
+    <span class="twinkle" style="top:81%;right:10%;font-size:25px;animation-delay:-2.8s">✧</span>
+    <span class="twinkle" style="top:92%;left:16%;font-size:23px;animation-delay:-1.7s">✦</span>
+    <span class="doodle" style="top:27%;left:2%;animation-delay:-2s">♡</span>
+    <span class="doodle" style="top:57%;right:2%;animation-delay:-5s">🎀</span>
+    <span class="doodle" style="top:76%;left:2%;animation-delay:-3s">♡</span>
+    <span class="doodle" style="top:12%;right:3%;animation-delay:-7s">✿</span>
+  </div>
 
   <!-- Floating Background Hearts -->
   <div id="heartsContainer" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
@@ -240,26 +306,6 @@
     </div>
   </div>
 
-
-  <!-- Surprise gift appears after successful passcode -->
-  <section id="giftOverlay" class="gift-overlay" role="dialog" aria-modal="true" aria-labelledby="giftTitle" hidden>
-    <div class="gift-panel">
-      <span class="inline-block mb-3 text-xs font-bold tracking-wider uppercase text-pink-500">A little surprise for you ✨</span>
-      <h2 id="giftTitle" class="font-romantic text-4xl font-bold text-romanticPink">Ada Kado Spesial! 🎁</h2>
-      <p id="giftHint" class="text-sm text-gray-600 mt-2">Ketuk kotak kado untuk membuka kejutan ulang tahunmu.</p>
-      <button id="giftVisual" type="button" class="gift-visual" onclick="openBirthdayGift()" aria-label="Buka kado ulang tahun">
-        <span class="gift-box-shape"></span><span class="gift-lid"></span>
-      </button>
-      <div id="giftReveal" class="gift-message hidden" aria-live="polite">
-        <p class="text-3xl mb-2">💖 ✨ 🎂</p>
-        <h3 class="text-2xl font-bold text-pink-500 mb-2">Happy Birthday, Sayang!</h3>
-        <p class="text-gray-600 text-sm leading-relaxed mb-5">Semoga hari ini penuh senyum, kejutan manis, dan cerita indah yang akan selalu kita ingat. Kamu istimewa! 💕</p>
-        <button type="button" onclick="enterBirthdayPage()" class="px-7 py-3 rounded-full bg-gradient-to-r from-pink-400 to-romanticPink font-bold text-white shadow-lg">Lihat Kejutannya ✨</button>
-      </div>
-      <button id="giftSkip" type="button" onclick="enterBirthdayPage()" class="mt-5 block mx-auto text-xs text-gray-500 underline underline-offset-4">Lewati animasi</button>
-    </div>
-  </section>
-
   <!-- Music Toggle Button -->
   <button id="musicToggleBtn" onclick="toggleAudio()" class="fixed top-5 right-5 z-40 glass-card px-4 py-2.5 rounded-full flex items-center gap-2 text-xs font-semibold text-romanticPink shadow-lg hover:border-romanticPink transition-all">
     <i id="musicIcon" class="fa-solid fa-music"></i>
@@ -271,6 +317,7 @@
   <!-- ========================================== -->
   <div id="mainContent" class="relative z-10 hidden max-w-4xl mx-auto px-4 py-8">
     
+    <!-- EDIT DI SINI — ucapan utama dan kalimat di halaman depan. -->
     <!-- HERO SECTION -->
     <header class="text-center py-10 px-4">
       <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-xs text-romanticPink font-semibold mb-4 border border-romanticPink/30 shadow-sm">
@@ -322,66 +369,49 @@
       </div>
     </section>
 
-    <!-- POLAROID PHOTO GALLERY -->
-    <section class="my-16">
+    <!-- ===============================================================
+         EDIT DI SINI — GALERI MEMORIES WITH YOU
+         1. Upload images/memory1.jpg, memory2.jpg, memory3.jpg ke GitHub.
+         2. Ubah judul dan deskripsi pada tiap kartu sesuai kenangan Anda.
+         3. Alamat foto ditulis sekali di src dan dipakai lightbox via JS.
+         4. Nama file dan huruf besar/kecil harus sama persis.
+         =============================================================== -->
+    <section class="my-16" id="memoriesSection">
       <div class="text-center mb-10">
         <h2 class="text-4xl font-romantic font-bold text-white drop-shadow-sm mb-2">Memories With You 📸</h2>
-        <p class="text-white/90 text-sm">Klik foto di bawah ini untuk melihat momen manis kita!</p>
+        <p class="text-white/90 text-sm">Klik foto untuk melihat kenangan kita lebih dekat!</p>
       </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 px-4">
-        <div onclick="openLightbox('https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80', 'First Date Momen Indah ✨')" class="polaroid transform -rotate-2">
-          <div class="aspect-square bg-gray-100 rounded overflow-hidden mb-3">
-            <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80" alt="Memory 1" class="w-full h-full object-cover">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 px-4 items-stretch">
+        <!-- EDIT FOTO 1: judul, deskripsi, dan src gambar -->
+        <div onclick="openMemoryCard(this)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMemoryCard(this)}" class="polaroid transform -rotate-2 h-full" data-title="Awal Cerita 💖">
+          <div class="aspect-square bg-pink-50 rounded overflow-hidden mb-3">
+            <img src="images/memory1.jpg" alt="Foto kenangan pertama" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none';this.parentElement.classList.add('memory-image-missing')">
           </div>
           <p class="font-romantic text-2xl text-center text-romanticPink font-bold">Awal Cerita 💖</p>
+          <p class="text-xs text-gray-500 text-center mt-2 leading-relaxed">Semua bermula dari pertemuan sederhana yang terasa begitu istimewa.</p>
         </div>
-
-        <div onclick="openLightbox('https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80', 'Jalan-jalan & Tertawa Bersama 🍦')" class="polaroid transform rotate-2">
-          <div class="aspect-square bg-gray-100 rounded overflow-hidden mb-3">
-            <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80" alt="Memory 2" class="w-full h-full object-cover">
+        <!-- EDIT FOTO 2: judul, deskripsi, dan src gambar -->
+        <div onclick="openMemoryCard(this)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMemoryCard(this)}" class="polaroid transform rotate-2 h-full" data-title="Liburan Seru 🏖️">
+          <div class="aspect-square bg-pink-50 rounded overflow-hidden mb-3">
+            <img src="images/memory2.jpg" alt="Foto liburan bersama" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none';this.parentElement.classList.add('memory-image-missing')">
           </div>
           <p class="font-romantic text-2xl text-center text-romanticPink font-bold">Liburan Seru 🏖️</p>
+          <p class="text-xs text-gray-500 text-center mt-2 leading-relaxed">Ke mana pun kita pergi, momen bersamamu selalu punya cerita.</p>
         </div>
-
-        <div onclick="openLightbox('https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800&q=80', 'Senyuman Favoritku Setiap Hari 😊')" class="polaroid transform -rotate-1">
-          <div class="aspect-square bg-gray-100 rounded overflow-hidden mb-3">
-            <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800&q=80" alt="Memory 3" class="w-full h-full object-cover">
+        <!-- EDIT FOTO 3: judul, deskripsi, dan src gambar -->
+        <div onclick="openMemoryCard(this)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMemoryCard(this)}" class="polaroid transform -rotate-1 h-full" data-title="Senyum Favorit 😊">
+          <div class="aspect-square bg-pink-50 rounded overflow-hidden mb-3">
+            <img src="images/memory3.jpg" alt="Foto senyum favorit" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none';this.parentElement.classList.add('memory-image-missing')">
           </div>
           <p class="font-romantic text-2xl text-center text-romanticPink font-bold">Senyum Favorit 😊</p>
+          <p class="text-xs text-gray-500 text-center mt-2 leading-relaxed">Senyummu selalu jadi salah satu alasan hari-hariku lebih indah.</p>
         </div>
       </div>
     </section>
 
-
-    <!-- OUR LITTLE STORY: edit the STORY_MOMENTS data in JavaScript -->
-    <section id="ourStorySection" class="my-16">
-      <div class="glass-card rounded-3xl p-6 md:p-9 border border-white/50 shadow-xl">
-        <div class="text-center mb-8">
-          <span class="inline-flex px-3 py-1 rounded-full bg-pink-100 text-pink-600 text-xs font-bold">💞 Moments to Remember</span>
-          <h2 class="text-4xl font-romantic font-bold text-romanticPink mt-3">Our Little Story</h2>
-          <p class="text-sm text-gray-600 mt-2">Kumpulan momen kecil yang membuat cerita kita terasa spesial.</p>
-        </div>
-        <div id="storyTimeline" class="story-line max-w-xl mx-auto"></div>
-        <p class="text-xs text-gray-500 mt-5 text-center">💡 Cerita, tanggal, dan foto dapat dipersonalisasi melalui data <code>STORY_MOMENTS</code> pada HTML.</p>
-      </div>
-    </section>
-
-    <!-- LOVE NOTES JAR -->
-    <section id="loveNotesSection" class="my-16">
-      <div class="glass-card rounded-3xl p-6 md:p-9 border border-white/50 shadow-xl text-center">
-        <span class="inline-flex px-3 py-1 rounded-full bg-purple-100 text-purple-600 text-xs font-bold">💌 A Little Message For You</span>
-        <h2 class="text-4xl font-romantic font-bold text-romanticPink mt-3">Love Notes Jar</h2>
-        <p class="text-sm text-gray-600 mb-5 mt-2">Ambil satu pesan dari stoples setiap kali kamu ingin tersenyum.</p>
-        <div id="jarArt" class="note-jar mb-4" aria-hidden="true">🫙💕</div>
-        <div id="notePaper" class="note-paper max-w-md mx-auto mb-6" aria-live="polite">
-          <p id="noteText" class="font-romantic text-2xl text-pink-600">Ada banyak pesan manis menunggumu di sini. ✨</p>
-        </div>
-        <button type="button" onclick="pickLoveNote()" class="px-7 py-3 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 text-white font-bold shadow-lg hover:scale-105 active:scale-95 transition-all">Ambil Pesan 💗</button>
-        <p id="noteCounter" class="text-xs text-gray-500 mt-4">Koleksi pesan istimewa 💖</p>
-      </div>
-    </section>
-
+    <!-- FRAME PHOTOBOOTH: pastel-frame.png harus berada di folder yang sama
+         dengan index.html. Jangan ubah koordinat PASTEL_WINDOWS kecuali
+         mengganti desain frame dan posisi transparansi tiga slot foto. -->
     <!-- PHOTOBOOTH 3-STRIP VERTICAL (MATCHING REFERENCE PHOTO) -->
     <section id="photoboothSection" class="my-16">
       <div class="glass-card p-6 md:p-8 rounded-3xl border border-white/50 relative shadow-xl">
@@ -462,6 +492,7 @@
       </div>
     </section>
 
+    <!-- EDIT DI SINI — pesan setelah lilin ditiup, di elemen id="wishMessage". -->
     <!-- INTERACTIVE BIRTHDAY CAKE -->
     <section class="my-16 text-center">
       <div class="glass-card p-8 md:p-10 rounded-3xl border border-white/50 relative shadow-xl">
@@ -498,6 +529,7 @@
       </div>
     </section>
 
+    <!-- EDIT DI SINI — isi kejutan dan jam makan malam pada bagian ini. -->
     <!-- SCRATCH CARD SURPRISE -->
     <section class="my-16 text-center max-w-lg mx-auto">
       <div class="glass-card p-6 md:p-8 rounded-3xl border border-white/50 relative shadow-xl">
@@ -537,6 +569,8 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
+    // EDIT DI SINI — kode ulang tahun (4 angka). Ini hanya pengunci kejutan,
+    // bukan proteksi aman: kode dalam HTML publik dapat dilihat pengunjung.
     const CORRECT_PASSCODE = "1234";
 
     // 1. Passcode Screen Logic
@@ -560,8 +594,11 @@
 
       if (enteredPasscode === CORRECT_PASSCODE) {
         document.getElementById('passcodeScreen').style.display = 'none';
-        document.getElementById('giftOverlay').hidden = false;
-        document.getElementById('giftVisual').focus();
+        document.getElementById('mainContent').classList.remove('hidden');
+        triggerConfetti();
+        startFloatingHearts();
+        initScratchCard();
+        initGameCanvas();
       } else {
         errEl.classList.remove('hidden');
         passInputs.forEach(i => {
@@ -569,116 +606,6 @@
           setTimeout(() => i.classList.remove('border-red-500'), 1500);
         });
       }
-    }
-
-
-    // Birthday Experience 2.0 — all personalization data lives here.
-    // Replace the sample moments with real dates, captions and optional image URLs.
-    const STORY_MOMENTS = [
-      { icon:'🌷', date:'Momen 01', title:'Awal Cerita', description:'Tempat untuk menuliskan bagaimana kisah indah ini bermula.', image:'' },
-      { icon:'📷', date:'Momen 02', title:'Hari yang Berkesan', description:'Tambahkan kenangan favorit, foto, dan cerita kecil yang selalu membuat tersenyum.', image:'' },
-      { icon:'✨', date:'Momen 03', title:'Petualangan Kita', description:'Tulis momen perjalanan, obrolan, atau pengalaman yang ingin dikenang.', image:'' },
-      { icon:'🎂', date:'Hari Ini', title:'Satu Lagi Cerita Indah', description:'Selamat ulang tahun! Semoga masih banyak kenangan manis yang bisa diciptakan bersama.', image:'' }
-    ];
-
-    const LOVE_NOTES = [
-      'Senyummu selalu punya cara membuat hari terasa lebih hangat. 🌷',
-      'Semoga setiap harapan kecilmu menemukan jalan untuk menjadi nyata. ✨',
-      'Terima kasih sudah menjadi bagian dari cerita yang istimewa. 💕',
-      'Hari ini kamu berhak mendapatkan semua peluk dan kebahagiaan! 🎂',
-      'Jangan lupa: kamu sangat berharga, hari ini dan setiap hari. 💖',
-      'Kalau hari terasa berat, ingat selalu ada hal baik yang menantimu. 🌈',
-      'Ada banyak alasan untuk tersenyum, dan kamu salah satunya. 😊',
-      'Semoga tawa kita selalu lebih panjang daripada cerita sedihnya. 🥰',
-      'Satu kado kecil: doa terbaik untuk setiap langkahmu. 🎁',
-      'Hal paling sederhana bisa jadi kenangan paling indah. 🌸',
-      'Teruslah bersinar dengan caramu sendiri. ⭐',
-      'Semoga tahun ini membawa kejutan-kejutan yang menyenangkan. 🎉',
-      'Aku suka bagaimana hal-hal kecil terasa lebih seru bersamamu. 💗',
-      'Untuk semua mimpi yang belum tercapai: pelan-pelan, pasti bisa. 🌼',
-      'Semoga hari-harimu penuh hal lucu yang membuatmu tertawa. 🐱',
-      'Kamu pantas mendapatkan kasih sayang yang tulus dan tenang. 🌙',
-      'Ada pesan sederhana hari ini: jangan lupa bahagia. 💌',
-      'Selamat bertambah usia, bertambah kisah, dan bertambah bahagia! 🎂',
-      'Semoga selalu ada ruang untuk beristirahat dan menikmati hidup. ☁️',
-      'Setiap versi dirimu layak dirayakan. 🦋',
-      'Satu hari bisa biasa saja, sampai ada kamu di dalamnya. 💞',
-      'Semoga hal-hal baik datang tanpa harus selalu ditunggu. 🍀',
-      'Foto mungkin menyimpan momen, tapi hati menyimpan rasanya. 📸',
-      'Satu lagi harapan: kita punya banyak cerita lucu untuk dikenang. 💝'
-    ];
-    let pageInitialized = false;
-    let giftIsOpen = false;
-    let lastNoteIndex = -1;
-    let noteCount = 0;
-
-    function openBirthdayGift() {
-      if (giftIsOpen) return;
-      giftIsOpen = true;
-      document.getElementById('giftVisual').classList.add('open');
-      document.getElementById('giftVisual').disabled = true;
-      document.getElementById('giftHint').textContent = 'Yeay! Kadonya terbuka! ✨';
-      document.getElementById('giftReveal').classList.remove('hidden');
-      if (typeof confetti === 'function') triggerConfetti();
-    }
-
-    function enterBirthdayPage() {
-      document.getElementById('giftOverlay').hidden = true;
-      document.getElementById('mainContent').classList.remove('hidden');
-      if (!pageInitialized) {
-        pageInitialized = true;
-        if (typeof confetti === 'function') triggerConfetti();
-        startFloatingHearts();
-        initScratchCard();
-        initGameCanvas();
-        renderStoryTimeline();
-      }
-      const firstHeading = document.querySelector('#mainContent h1');
-      if (firstHeading) { firstHeading.setAttribute('tabindex','-1'); firstHeading.focus({preventScroll:true}); }
-      window.scrollTo({top:0,behavior:'smooth'});
-    }
-
-    function renderStoryTimeline() {
-      const target = document.getElementById('storyTimeline');
-      target.replaceChildren();
-      STORY_MOMENTS.forEach(moment => {
-        const item = document.createElement('article');
-        item.className = 'story-entry story-card';
-        const heading = document.createElement('h3');
-        heading.className = 'text-lg font-bold text-pink-600 mb-1';
-        heading.textContent = `${moment.icon} ${moment.title}`;
-        const date = document.createElement('p');
-        date.className = 'text-xs font-semibold text-purple-500 mb-2';
-        date.textContent = moment.date;
-        const body = document.createElement('p');
-        body.className = 'text-sm text-gray-600 leading-relaxed';
-        body.textContent = moment.description;
-        item.append(date, heading, body);
-        if (moment.image) {
-          const pic = document.createElement('img');
-          pic.src = moment.image;
-          pic.alt = 'Kenangan: ' + moment.title;
-          pic.loading = 'lazy';
-          pic.className = 'mt-3 rounded-xl w-full max-h-64 object-cover';
-          item.append(pic);
-        }
-        target.append(item);
-      });
-    }
-
-    function pickLoveNote() {
-      if (!LOVE_NOTES.length) return;
-      let idx;
-      if (LOVE_NOTES.length === 1) idx = 0;
-      else { do { idx = Math.floor(Math.random()*LOVE_NOTES.length); } while (idx === lastNoteIndex); }
-      lastNoteIndex = idx;
-      noteCount++;
-      document.getElementById('noteText').textContent = LOVE_NOTES[idx];
-      document.getElementById('noteCounter').textContent = `Pesan ke-${noteCount} · ${LOVE_NOTES.length} pesan dalam stoples`;
-      const jar = document.getElementById('jarArt');
-      jar.classList.remove('shake');
-      void jar.offsetWidth;
-      jar.classList.add('shake');
     }
 
     // 2. Confetti Effect
@@ -1092,6 +1019,17 @@
       sCanvas.addEventListener('touchstart', () => isDrawing = true);
       sCanvas.addEventListener('touchend', () => isDrawing = false);
       sCanvas.addEventListener('touchmove', scratch);
+    }
+
+    // EDIT DI SINI — judul pop-up mengikuti data-title pada kartu galeri.
+    // URL gambar dibaca langsung dari src sehingga cukup ubah satu nama file per foto.
+    function openMemoryCard(card) {
+      const img = card.querySelector('img');
+      if (!img || !img.complete || !img.naturalWidth) {
+        alert('Foto belum tersedia. Upload file gambar ke folder images/ di GitHub.');
+        return;
+      }
+      openLightbox(img.currentSrc || img.src, card.dataset.title || 'Memories With You');
     }
 
     // 9. Lightbox Modal Logic
