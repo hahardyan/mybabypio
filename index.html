@@ -179,6 +179,31 @@
       border: 2px dashed rgba(225,80,140,.7); z-index: 2;
       pointer-events: none;
     }
+
+    /* Birthday Experience 2.0: gift opening, story timeline and love notes */
+    .gift-overlay { position:fixed; inset:0; z-index:55; display:flex; align-items:center; justify-content:center; padding:20px; background:linear-gradient(145deg,#fce2ef,#e9d9fa 55%,#fff7e9); overflow-y:auto; }
+    .gift-overlay[hidden] { display:none !important; }
+    .gift-panel { width:min(100%,480px); padding:30px 22px; text-align:center; border-radius:30px; background:#fffefaed; box-shadow:0 25px 70px #ba63904a; border:2px solid #fff; }
+    .gift-visual { width:190px; height:190px; margin:15px auto 22px; position:relative; display:block; cursor:pointer; border:0; background:transparent; }
+    .gift-box-shape { position:absolute; left:29px; top:77px; width:132px; height:97px; border-radius:8px 8px 17px 17px; background:linear-gradient(120deg,#ff84b8,#f45194); box-shadow:0 12px 18px #db80a155; transition:transform .65s; }
+    .gift-box-shape::after {content:'';position:absolute;left:53px;top:0;height:100%;width:26px;background:#ffdb84;}
+    .gift-lid {position:absolute;top:60px;left:19px;width:152px;height:32px;border-radius:8px;background:#ff91bf;box-shadow:0 5px 0 #e96b9d;z-index:2;transition:transform .7s;}
+    .gift-lid::after {content:'🎀';position:absolute;font-size:57px;top:-48px;left:45px;}
+    .gift-visual.open .gift-lid {transform:translate(-35px,-70px) rotate(-22deg);}
+    .gift-visual.open .gift-box-shape {transform:translateY(18px) scale(.92);}
+    .gift-visual:focus-visible {outline:3px solid #a967ba; outline-offset:2px; border-radius:20px;}
+    .gift-message {animation:giftRise .6s ease-out both;}
+    @keyframes giftRise {from {opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    .story-card {background:linear-gradient(140deg,#fff,#fff5fa);border:1px solid #f6c8df;border-radius:20px;padding:18px 20px;box-shadow:0 8px 22px #e47aa01c;}
+    .story-line {position:relative;padding-left:30px;border-left:3px dashed #ef9cc3;margin-left:12px;}
+    .story-entry {position:relative;margin-bottom:20px;}
+    .story-entry:last-child {margin-bottom:0;}
+    .story-entry::before {content:'♥';position:absolute;left:-45px;top:15px;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#f49ac4;color:#fff;border:3px solid white;box-shadow:0 0 0 2px #f49ac4;font-size:11px;}
+    .note-jar {font-size:85px;line-height:1;filter:drop-shadow(0 12px 14px #e78fb07a);transition:transform .35s;display:inline-block;}
+    .note-jar.shake {animation:jarShake .45s ease;}
+    @keyframes jarShake {0%,100%{transform:rotate(0)}25%{transform:rotate(-11deg)}75%{transform:rotate(11deg)}}
+    .note-paper {background:#fff9e8;min-height:125px;border:1px solid #f2dfb7;box-shadow:0 9px 18px #d291a124;border-radius:15px;padding:24px 18px;display:flex;align-items:center;justify-content:center;transform:rotate(-1deg);}
+    @media (prefers-reduced-motion:reduce) {.gift-visual *,.gift-message,.note-jar {animation:none !important;transition:none !important;}}
   </style>
 </head>
 <body class="relative min-h-screen">
@@ -214,6 +239,26 @@
       </button>
     </div>
   </div>
+
+
+  <!-- Surprise gift appears after successful passcode -->
+  <section id="giftOverlay" class="gift-overlay" role="dialog" aria-modal="true" aria-labelledby="giftTitle" hidden>
+    <div class="gift-panel">
+      <span class="inline-block mb-3 text-xs font-bold tracking-wider uppercase text-pink-500">A little surprise for you ✨</span>
+      <h2 id="giftTitle" class="font-romantic text-4xl font-bold text-romanticPink">Ada Kado Spesial! 🎁</h2>
+      <p id="giftHint" class="text-sm text-gray-600 mt-2">Ketuk kotak kado untuk membuka kejutan ulang tahunmu.</p>
+      <button id="giftVisual" type="button" class="gift-visual" onclick="openBirthdayGift()" aria-label="Buka kado ulang tahun">
+        <span class="gift-box-shape"></span><span class="gift-lid"></span>
+      </button>
+      <div id="giftReveal" class="gift-message hidden" aria-live="polite">
+        <p class="text-3xl mb-2">💖 ✨ 🎂</p>
+        <h3 class="text-2xl font-bold text-pink-500 mb-2">Happy Birthday, Sayang!</h3>
+        <p class="text-gray-600 text-sm leading-relaxed mb-5">Semoga hari ini penuh senyum, kejutan manis, dan cerita indah yang akan selalu kita ingat. Kamu istimewa! 💕</p>
+        <button type="button" onclick="enterBirthdayPage()" class="px-7 py-3 rounded-full bg-gradient-to-r from-pink-400 to-romanticPink font-bold text-white shadow-lg">Lihat Kejutannya ✨</button>
+      </div>
+      <button id="giftSkip" type="button" onclick="enterBirthdayPage()" class="mt-5 block mx-auto text-xs text-gray-500 underline underline-offset-4">Lewati animasi</button>
+    </div>
+  </section>
 
   <!-- Music Toggle Button -->
   <button id="musicToggleBtn" onclick="toggleAudio()" class="fixed top-5 right-5 z-40 glass-card px-4 py-2.5 rounded-full flex items-center gap-2 text-xs font-semibold text-romanticPink shadow-lg hover:border-romanticPink transition-all">
@@ -305,6 +350,35 @@
           </div>
           <p class="font-romantic text-2xl text-center text-romanticPink font-bold">Senyum Favorit 😊</p>
         </div>
+      </div>
+    </section>
+
+
+    <!-- OUR LITTLE STORY: edit the STORY_MOMENTS data in JavaScript -->
+    <section id="ourStorySection" class="my-16">
+      <div class="glass-card rounded-3xl p-6 md:p-9 border border-white/50 shadow-xl">
+        <div class="text-center mb-8">
+          <span class="inline-flex px-3 py-1 rounded-full bg-pink-100 text-pink-600 text-xs font-bold">💞 Moments to Remember</span>
+          <h2 class="text-4xl font-romantic font-bold text-romanticPink mt-3">Our Little Story</h2>
+          <p class="text-sm text-gray-600 mt-2">Kumpulan momen kecil yang membuat cerita kita terasa spesial.</p>
+        </div>
+        <div id="storyTimeline" class="story-line max-w-xl mx-auto"></div>
+        <p class="text-xs text-gray-500 mt-5 text-center">💡 Cerita, tanggal, dan foto dapat dipersonalisasi melalui data <code>STORY_MOMENTS</code> pada HTML.</p>
+      </div>
+    </section>
+
+    <!-- LOVE NOTES JAR -->
+    <section id="loveNotesSection" class="my-16">
+      <div class="glass-card rounded-3xl p-6 md:p-9 border border-white/50 shadow-xl text-center">
+        <span class="inline-flex px-3 py-1 rounded-full bg-purple-100 text-purple-600 text-xs font-bold">💌 A Little Message For You</span>
+        <h2 class="text-4xl font-romantic font-bold text-romanticPink mt-3">Love Notes Jar</h2>
+        <p class="text-sm text-gray-600 mb-5 mt-2">Ambil satu pesan dari stoples setiap kali kamu ingin tersenyum.</p>
+        <div id="jarArt" class="note-jar mb-4" aria-hidden="true">🫙💕</div>
+        <div id="notePaper" class="note-paper max-w-md mx-auto mb-6" aria-live="polite">
+          <p id="noteText" class="font-romantic text-2xl text-pink-600">Ada banyak pesan manis menunggumu di sini. ✨</p>
+        </div>
+        <button type="button" onclick="pickLoveNote()" class="px-7 py-3 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 text-white font-bold shadow-lg hover:scale-105 active:scale-95 transition-all">Ambil Pesan 💗</button>
+        <p id="noteCounter" class="text-xs text-gray-500 mt-4">Koleksi pesan istimewa 💖</p>
       </div>
     </section>
 
@@ -486,11 +560,8 @@
 
       if (enteredPasscode === CORRECT_PASSCODE) {
         document.getElementById('passcodeScreen').style.display = 'none';
-        document.getElementById('mainContent').classList.remove('hidden');
-        triggerConfetti();
-        startFloatingHearts();
-        initScratchCard();
-        initGameCanvas();
+        document.getElementById('giftOverlay').hidden = false;
+        document.getElementById('giftVisual').focus();
       } else {
         errEl.classList.remove('hidden');
         passInputs.forEach(i => {
@@ -498,6 +569,116 @@
           setTimeout(() => i.classList.remove('border-red-500'), 1500);
         });
       }
+    }
+
+
+    // Birthday Experience 2.0 — all personalization data lives here.
+    // Replace the sample moments with real dates, captions and optional image URLs.
+    const STORY_MOMENTS = [
+      { icon:'🌷', date:'Momen 01', title:'Awal Cerita', description:'Tempat untuk menuliskan bagaimana kisah indah ini bermula.', image:'' },
+      { icon:'📷', date:'Momen 02', title:'Hari yang Berkesan', description:'Tambahkan kenangan favorit, foto, dan cerita kecil yang selalu membuat tersenyum.', image:'' },
+      { icon:'✨', date:'Momen 03', title:'Petualangan Kita', description:'Tulis momen perjalanan, obrolan, atau pengalaman yang ingin dikenang.', image:'' },
+      { icon:'🎂', date:'Hari Ini', title:'Satu Lagi Cerita Indah', description:'Selamat ulang tahun! Semoga masih banyak kenangan manis yang bisa diciptakan bersama.', image:'' }
+    ];
+
+    const LOVE_NOTES = [
+      'Senyummu selalu punya cara membuat hari terasa lebih hangat. 🌷',
+      'Semoga setiap harapan kecilmu menemukan jalan untuk menjadi nyata. ✨',
+      'Terima kasih sudah menjadi bagian dari cerita yang istimewa. 💕',
+      'Hari ini kamu berhak mendapatkan semua peluk dan kebahagiaan! 🎂',
+      'Jangan lupa: kamu sangat berharga, hari ini dan setiap hari. 💖',
+      'Kalau hari terasa berat, ingat selalu ada hal baik yang menantimu. 🌈',
+      'Ada banyak alasan untuk tersenyum, dan kamu salah satunya. 😊',
+      'Semoga tawa kita selalu lebih panjang daripada cerita sedihnya. 🥰',
+      'Satu kado kecil: doa terbaik untuk setiap langkahmu. 🎁',
+      'Hal paling sederhana bisa jadi kenangan paling indah. 🌸',
+      'Teruslah bersinar dengan caramu sendiri. ⭐',
+      'Semoga tahun ini membawa kejutan-kejutan yang menyenangkan. 🎉',
+      'Aku suka bagaimana hal-hal kecil terasa lebih seru bersamamu. 💗',
+      'Untuk semua mimpi yang belum tercapai: pelan-pelan, pasti bisa. 🌼',
+      'Semoga hari-harimu penuh hal lucu yang membuatmu tertawa. 🐱',
+      'Kamu pantas mendapatkan kasih sayang yang tulus dan tenang. 🌙',
+      'Ada pesan sederhana hari ini: jangan lupa bahagia. 💌',
+      'Selamat bertambah usia, bertambah kisah, dan bertambah bahagia! 🎂',
+      'Semoga selalu ada ruang untuk beristirahat dan menikmati hidup. ☁️',
+      'Setiap versi dirimu layak dirayakan. 🦋',
+      'Satu hari bisa biasa saja, sampai ada kamu di dalamnya. 💞',
+      'Semoga hal-hal baik datang tanpa harus selalu ditunggu. 🍀',
+      'Foto mungkin menyimpan momen, tapi hati menyimpan rasanya. 📸',
+      'Satu lagi harapan: kita punya banyak cerita lucu untuk dikenang. 💝'
+    ];
+    let pageInitialized = false;
+    let giftIsOpen = false;
+    let lastNoteIndex = -1;
+    let noteCount = 0;
+
+    function openBirthdayGift() {
+      if (giftIsOpen) return;
+      giftIsOpen = true;
+      document.getElementById('giftVisual').classList.add('open');
+      document.getElementById('giftVisual').disabled = true;
+      document.getElementById('giftHint').textContent = 'Yeay! Kadonya terbuka! ✨';
+      document.getElementById('giftReveal').classList.remove('hidden');
+      if (typeof confetti === 'function') triggerConfetti();
+    }
+
+    function enterBirthdayPage() {
+      document.getElementById('giftOverlay').hidden = true;
+      document.getElementById('mainContent').classList.remove('hidden');
+      if (!pageInitialized) {
+        pageInitialized = true;
+        if (typeof confetti === 'function') triggerConfetti();
+        startFloatingHearts();
+        initScratchCard();
+        initGameCanvas();
+        renderStoryTimeline();
+      }
+      const firstHeading = document.querySelector('#mainContent h1');
+      if (firstHeading) { firstHeading.setAttribute('tabindex','-1'); firstHeading.focus({preventScroll:true}); }
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function renderStoryTimeline() {
+      const target = document.getElementById('storyTimeline');
+      target.replaceChildren();
+      STORY_MOMENTS.forEach(moment => {
+        const item = document.createElement('article');
+        item.className = 'story-entry story-card';
+        const heading = document.createElement('h3');
+        heading.className = 'text-lg font-bold text-pink-600 mb-1';
+        heading.textContent = `${moment.icon} ${moment.title}`;
+        const date = document.createElement('p');
+        date.className = 'text-xs font-semibold text-purple-500 mb-2';
+        date.textContent = moment.date;
+        const body = document.createElement('p');
+        body.className = 'text-sm text-gray-600 leading-relaxed';
+        body.textContent = moment.description;
+        item.append(date, heading, body);
+        if (moment.image) {
+          const pic = document.createElement('img');
+          pic.src = moment.image;
+          pic.alt = 'Kenangan: ' + moment.title;
+          pic.loading = 'lazy';
+          pic.className = 'mt-3 rounded-xl w-full max-h-64 object-cover';
+          item.append(pic);
+        }
+        target.append(item);
+      });
+    }
+
+    function pickLoveNote() {
+      if (!LOVE_NOTES.length) return;
+      let idx;
+      if (LOVE_NOTES.length === 1) idx = 0;
+      else { do { idx = Math.floor(Math.random()*LOVE_NOTES.length); } while (idx === lastNoteIndex); }
+      lastNoteIndex = idx;
+      noteCount++;
+      document.getElementById('noteText').textContent = LOVE_NOTES[idx];
+      document.getElementById('noteCounter').textContent = `Pesan ke-${noteCount} · ${LOVE_NOTES.length} pesan dalam stoples`;
+      const jar = document.getElementById('jarArt');
+      jar.classList.remove('shake');
+      void jar.offsetWidth;
+      jar.classList.add('shake');
     }
 
     // 2. Confetti Effect
